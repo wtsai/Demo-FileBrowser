@@ -48,6 +48,9 @@ function readdir (req, res) {
 
 			DirListIndex += 1;
 		}
+        // Initail ASSIGNEDPATH and req.params[0] to ''
+        req.params[0] = '';
+        ASSIGNEDPATH = '';
 	}, function(){
 		res.send(DirList);
 	});
