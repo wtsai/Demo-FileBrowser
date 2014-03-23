@@ -1,7 +1,7 @@
 {
   "name": "Demo-FileBrowser",
   "description": "Provide the api to list the file system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "start": "node app.js"
