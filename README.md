@@ -8,6 +8,7 @@ Features
 -
 
 * Provide the api to list the file system
+* Support png and txt display to the client.
 
 License
 -
