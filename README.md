@@ -1,3 +1,4 @@
+
 Demo-FileBrowser
 ==============
 
@@ -8,7 +9,8 @@ Features
 -
 
 * Provide the api to list the file system
-* Support png and txt display to the client.
+* Provide the api to show text and png.
+* Provide the api to display music and video.
 
 License
 -

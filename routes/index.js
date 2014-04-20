@@ -1,4 +1,5 @@
 var fs = require('fs');
+var url = require('url');
 var path = require('path');
 var DirReader = require( 'DirReader' );
 var ROOTFOLDER = './public/share';
@@ -8,6 +9,7 @@ module.exports = {
 	'/': index,
 	'/user': user,
 	'/File/Txt/*': readtxt,
+	'/File/Media/*': readmedia,
 	'/File/Dir/*': readdir,
 	'/File/Dir': readdir
 }
@@ -49,15 +51,55 @@ function readtxt(req, res) {
         //ASSIGNEDPATH = '/' + req.params[0];
         ASSIGNEDPATH = req.params[0];
     } 
-	console.log( '[readtxt]req.params[0]: ' + req.params[0]);
-	console.log( '[readtxt]ASSIGNEDPATH: ' + ASSIGNEDPATH);
-	console.log( '[readtxt]ROOTFOLDER:' + ROOTFOLDER );
+	//console.log( '[readtxt]req.params[0]: ' + req.params[0]);
+	//console.log( '[readtxt]ASSIGNEDPATH: ' + ASSIGNEDPATH);
+	//console.log( '[readtxt]ROOTFOLDER:' + ROOTFOLDER );
     fs.readFile(ROOTFOLDER + '/' + ASSIGNEDPATH, 'utf8', function (err, data) {
         if (err) 
             throw err;
         console.log('txt: ' + data);
         return res.json({ 
             txt : data.toString()
+        });
+    });
+};
+
+function readmedia(req, res) {
+    var ASSIGNEDPATH = '';
+    if (req.params.ROOT)
+    {
+        console.log( '[readmedia][ req.params.ROOT ]: ' + req.params.ROOT );
+        ROOTFOLDER = './' + req.params.ROOT;
+    }
+    
+    if (req.params[0])
+    {
+        console.log( '[readmedia][ req.params[0] ]: ' + req.params[0] );
+        //ASSIGNEDPATH = '/' + req.params[0];
+        ASSIGNEDPATH = req.params[0];
+    } 
+	//console.log( '[readmedia]req.params[0]: ' + req.params[0]);
+	//console.log( '[readmedia]ASSIGNEDPATH: ' + ASSIGNEDPATH);
+	//console.log( '[readmedia]ROOTFOLDER:' + ROOTFOLDER );
+
+    var filepath = path.join(ROOTFOLDER, ASSIGNEDPATH);
+    //console.log('filepath: ' + filepath);
+
+    fs.exists(filepath, function(exists) {
+        if (!exists) {
+            //res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('Not Found\n');
+            return;
+        }
+
+        fs.readFile(filepath, function(err, content) {
+            //res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.end(content);
+            /*  Error when playing Fashion_DivX720p_ASP.divx on Cubieboard.
+                terminate called after throwing an instance of 'std::bad_alloc'
+                  what():  std::bad_alloc
+                Aborted
+            */
         });
     });
 };
@@ -79,9 +121,9 @@ function readdir (req, res) {
         //ASSIGNEDPATH = '/' + req.params[0];
         ASSIGNEDPATH = req.params[0];
     } 
-	console.log( '[readdir]req.params[0]: ' + req.params[0]);
-	console.log( '[readdir]ASSIGNEDPATH: ' + ASSIGNEDPATH);
-	console.log( '[readdir]ROOTFOLDER:' + ROOTFOLDER );
+	//console.log( '[readdir]req.params[0]: ' + req.params[0]);
+	//console.log( '[readdir]ASSIGNEDPATH: ' + ASSIGNEDPATH);
+	//console.log( '[readdir]ROOTFOLDER:' + ROOTFOLDER );
 	DirReader.ReadDir( ROOTFOLDER,  ASSIGNEDPATH, function( err, DirPath, stats, ifDir ){
 
 		if( err ){
