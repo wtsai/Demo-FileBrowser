@@ -9,20 +9,12 @@ module.exports = {
 	'/': index,
 	'/user': user,
 	'/File/Txt/*': readtxt,
-	'/File/Media/*': readmedia,
+	'/File/Media/*': readmedia,  
+	'/File/Music/*': readmusic,  
+	'/File/Video/*': readvideo,  
 	'/File/Dir/*': readdir,
 	'/File/Dir': readdir
 }
-/*
-module.exports = {
-	'/': index,
-	'/user': user,
-	'/File/Dir': readdir,
-	'/File/Dir/*': readdir,
-	'/File/Dir/:ROOT': readdir,
-	'/File/Dir/:ROOT/*': readdir
-}
-*/
 
 function index (req, res) {
 	res.render('index', { title: 'Under Construction.'});
@@ -30,7 +22,6 @@ function index (req, res) {
 
 function user (req, res) {
 	res.send("respond with a resource");
-    //res.sendfile('hello.html'); //http://www.hacksparrow.com/how-to-server-static-html-files-in-express-js.html
 };
 
 function updatedir(req, res) {
@@ -41,23 +32,16 @@ function readtxt(req, res) {
     var ASSIGNEDPATH = '';
     if (req.params.ROOT)
     {
-        console.log( '[readtxt][ req.params.ROOT ]: ' + req.params.ROOT );
         ROOTFOLDER = './' + req.params.ROOT;
     }
     
     if (req.params[0])
     {
-        console.log( '[readtxt][ req.params[0] ]: ' + req.params[0] );
-        //ASSIGNEDPATH = '/' + req.params[0];
         ASSIGNEDPATH = req.params[0];
     } 
-	//console.log( '[readtxt]req.params[0]: ' + req.params[0]);
-	//console.log( '[readtxt]ASSIGNEDPATH: ' + ASSIGNEDPATH);
-	//console.log( '[readtxt]ROOTFOLDER:' + ROOTFOLDER );
     fs.readFile(ROOTFOLDER + '/' + ASSIGNEDPATH, 'utf8', function (err, data) {
         if (err) 
             throw err;
-        console.log('txt: ' + data);
         return res.json({ 
             txt : data.toString()
         });
@@ -68,22 +52,15 @@ function readmedia(req, res) {
     var ASSIGNEDPATH = '';
     if (req.params.ROOT)
     {
-        console.log( '[readmedia][ req.params.ROOT ]: ' + req.params.ROOT );
         ROOTFOLDER = './' + req.params.ROOT;
     }
     
     if (req.params[0])
     {
-        console.log( '[readmedia][ req.params[0] ]: ' + req.params[0] );
-        //ASSIGNEDPATH = '/' + req.params[0];
         ASSIGNEDPATH = req.params[0];
     } 
-	//console.log( '[readmedia]req.params[0]: ' + req.params[0]);
-	//console.log( '[readmedia]ASSIGNEDPATH: ' + ASSIGNEDPATH);
-	//console.log( '[readmedia]ROOTFOLDER:' + ROOTFOLDER );
 
     var filepath = path.join(ROOTFOLDER, ASSIGNEDPATH);
-    //console.log('filepath: ' + filepath);
 
     fs.exists(filepath, function(exists) {
         if (!exists) {
@@ -94,13 +71,79 @@ function readmedia(req, res) {
 
         fs.readFile(filepath, function(err, content) {
             //res.writeHead(200, {'Content-Type': 'text/plain'});
-            res.end(content);
-            /*  Error when playing Fashion_DivX720p_ASP.divx on Cubieboard.
-                terminate called after throwing an instance of 'std::bad_alloc'
-                  what():  std::bad_alloc
-                Aborted
-            */
+            if( err ){
+                console.log( '[ ERROR ]', err );
+            }
+            else {
+                res.end(content);
+                /*  Error when playing Fashion_DivX720p_ASP.divx on Cubieboard.
+                    terminate called after throwing an instance of 'std::bad_alloc'
+                      what():  std::bad_alloc
+                    Aborted
+                */
+            }
         });
+    });
+};
+
+function readmusic(req, res) {
+    var ASSIGNEDPATH = '';
+    if (req.params.ROOT)
+    {
+        ROOTFOLDER = './' + req.params.ROOT;
+    }
+    
+    if (req.params[0])
+    {
+        ASSIGNEDPATH = req.params[0];
+    } 
+    
+    var filepath = path.join(ROOTFOLDER, ASSIGNEDPATH);
+
+    fs.exists(filepath, function(exists) {
+        if (!exists) {
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('Not Found\n');
+            return;
+        }
+        
+        fs.readFile(filepath, function(err, content) {
+            if( err ){
+                console.log( '[ ERROR ]', err );
+            }
+            else {
+                res.end(new Buffer(content));
+            }
+            
+        });
+    });
+};
+
+function readvideo(req, res) {
+    var ASSIGNEDPATH = '';
+    if (req.params.ROOT)
+    {
+        ROOTFOLDER = './' + req.params.ROOT;
+    }
+    
+    if (req.params[0])
+    {
+        ASSIGNEDPATH = req.params[0];
+    } 
+    var filename= url.parse( '..' + '/' + ROOTFOLDER + '/' + ASSIGNEDPATH).pathname;
+    
+    var filepath = path.join(__dirname, filename); 
+
+    fs.exists(filepath, function(exists) {
+        if (!exists) {
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('Not Found\n');
+            return;
+        }        
+
+        var stream = fs.createReadStream(filepath); 
+        stream.pipe(res);
+
     });
 };
 
@@ -111,19 +154,13 @@ function readdir (req, res) {
 
     if (req.params.ROOT)
     {
-        //console.log( '[ req.params.ROOT ]: ' + req.params.ROOT );
         ROOTFOLDER = './' + req.params.ROOT;
     }
     
     if (req.params[0])
     {
-        //console.log( '[ req.params[0] ]: ' + req.params[0] );
-        //ASSIGNEDPATH = '/' + req.params[0];
         ASSIGNEDPATH = req.params[0];
     } 
-	//console.log( '[readdir]req.params[0]: ' + req.params[0]);
-	//console.log( '[readdir]ASSIGNEDPATH: ' + ASSIGNEDPATH);
-	//console.log( '[readdir]ROOTFOLDER:' + ROOTFOLDER );
 	DirReader.ReadDir( ROOTFOLDER,  ASSIGNEDPATH, function( err, DirPath, stats, ifDir ){
 
 		if( err ){
